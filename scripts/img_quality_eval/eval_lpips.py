@@ -8,39 +8,49 @@ import torchvision.transforms as transforms
 from torch.nn.functional import normalize
 import warnings
 
-# prevent warnings to terminal output
-warnings.filterwarnings('ignore', category=DeprecationWarning)
-warnings.filterwarnings('ignore', category=UserWarning)
+def lpips_eval(gt, homog):
+    # prevent warnings to terminal output
+    warnings.filterwarnings('ignore', category=DeprecationWarning)
+    warnings.filterwarnings('ignore', category=UserWarning)
 
-# best forward scores
-loss_fn_alex = lpips.LPIPS(net='alex')
+    # best forward scores
+    loss_fn_alex = lpips.LPIPS(net='alex')
 
-# closer to "traditional" perceptual loss, when used for optimization
-# loss_fn_vgg = lpips.LPIPS(net='vgg')
-
-
-# read image
-img0 = cv2.imread('../../img/eval_original_image.png')
-img0 = cv2.cvtColor(img0, cv2.COLOR_BGR2RGB)
-
-img1 = cv2.imread('../../img/eval_compressed_image1.png')
-img1 = cv2.cvtColor(img1, cv2.COLOR_BGR2RGB)
+    # closer to "traditional" perceptual loss, when used for optimization
+    # loss_fn_vgg = lpips.LPIPS(net='vgg')
 
 
-# define transform to convert the image to tensor
-transform = transforms.ToTensor()
+    # read image
+    # img0 = cv2.imread('../../img/eval_original_image.png')
+    # img0 = cv2.cvtColor(img0, cv2.COLOR_BGR2RGB)
+    img0 = cv2.cvtColor(gt, cv2.COLOR_BGR2RGB)
 
-# convert the image to PyTorch tensor
-img0 = transform(img0)
-img1 = transform(img1)
+    # img1 = cv2.imread('../../img/eval_compressed_image1.png')
+    # img1 = cv2.cvtColor(img1, cv2.COLOR_BGR2RGB)
+    img1 = cv2.cvtColor(homog, cv2.COLOR_BGR2RGB)
 
-# normalize values between -1 and 1
-mean0, std0, var0 = torch.mean(img0), torch.std(img0), torch.var(img0)
-mean1, std1, var1 = torch.mean(img1), torch.std(img1), torch.var(img1)
 
-img0 = (img0-mean0)/std0
-img1 = (img1-mean1)/std1
+    # define transform to convert the image to tensor
+    transform = transforms.ToTensor()
 
-# passing images to LPIPS model, getting it's output
-d = loss_fn_alex.forward(img0, img1)
-print(f'Distance between images: {d}')
+    # convert the image to PyTorch tensor
+    img0 = transform(img0)
+    img1 = transform(img1)
+
+    # normalize values between -1 and 1
+    mean0, std0, var0 = torch.mean(img0), torch.std(img0), torch.var(img0)
+    mean1, std1, var1 = torch.mean(img1), torch.std(img1), torch.var(img1)
+
+    img0 = (img0-mean0)/std0
+    img1 = (img1-mean1)/std1
+
+    # passing images to LPIPS model, getting it's output
+    d = loss_fn_alex.forward(img0, img1)
+    # print(f'Distance between images: {d}')
+    return d.detach().numpy()[0][0][0][0]
+
+if __name__ == '__main__':
+    gt = cv2.imread('../../img/eval_original_image.png')
+    homog = cv2.imread('../../img/eval_compressed_image1.png')
+    distance = lpips_eval(gt, homog)
+    print(f'Distance between images: {distance}')
