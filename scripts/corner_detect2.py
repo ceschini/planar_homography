@@ -12,7 +12,7 @@ def get_intersection(line1, line2):
     return (x, y)
 
 # read and display image
-img = cv2.imread('...img.jpg')
+img = cv2.imread('../img/foto1_cap1.jpg')
 plt.imshow(img)
 plt.show()
 
