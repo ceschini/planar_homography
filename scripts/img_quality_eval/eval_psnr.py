@@ -6,7 +6,7 @@ import cv2
 import numpy as np
 
 
-def psnr(original, compressed):
+def psnr_eval(original, compressed):
     mse = np.mean((original - compressed) ** 2)
     if (mse == 0):
         # MSE is zero means no noise is present in tl
@@ -20,7 +20,7 @@ def psnr(original, compressed):
 def main():
     original = cv2.imread("../../img/eval_original_image.png")
     compressed = cv2.imread("../../img/eval_compressed_image1.png")
-    value = psnr(original, compressed)
+    value = psnr_eval(original, compressed)
     print(f'PSNR value is {value} dB')
 
 
